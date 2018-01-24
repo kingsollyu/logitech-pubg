@@ -1,182 +1,256 @@
---======================================================================--
---============================    OnDefine   ===========================--
---======================================================================--
+local pubg = {}
+-------------------------------------------------------------------------------
+-- 快捷键定义区域
+-------------------------------------------------------------------------------
+pubg.keyPickupWeapon = 8
+pubg.keyAlwayRun     = 4 -- 直接按键
+pubg.keyLookAround   = 1 -- alt + G + 定义
+pubg.keyWeaponUmp9   = 8 -- G + 定义
+pubg.keyWeaponAkm    = 7 -- G + 定义
+pubg.keyWeaponM16a4  = 7 -- 定义
+pubg.keyWeaponM416   = 5 -- 定义
+pubg.keyDrop         = 1 -- G + 定义
 
--- 一键拾取物品
-local keyUmp9 = 8
-local keyM16a4 = 7
-local keyQuadruple = "capslock"
+-------------------------------------------------------------------------------
+-- 变量定义区域
+-------------------------------------------------------------------------------
+-- 鼠标G键是否被按下
+pubg.isGKeyPressed = false
+-- 当鼠标G键被按下去之后，其他按钮是否被按下
+pubg.isOKeyPressed = false
+-- 当前选择的武器
+pubg.currentWeapon = "NIL"
 
--- G键是否被按下
-local isGPressed = false
-
--- G键被按下的时候，其他键位被按下
-local isOPressed = false
-
--- 当前使用的武器
-local currentWeapon = "none"
-
---======================================================================--
---=============================    OnData   ============================--
---======================================================================--
--- data from https://github.com/liantian-cn/logitech-pubg/blob/master/adv_mode.lua
-local recoil_table = {}
-
-recoil_table["ump9"] = {
-    basic = { 18, 19, 18, 19, 18, 19, 19, 21, 23, 24, 23, 24, 23, 24, 23, 24, 23, 24, 23, 24, 23, 24, 24, 25, 24, 25, 24, 25, 24, 25, 24, 25, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26, 25, 26 },
-    quadruple = { 83.3, 83.3, 83.3, 83.3, 83.3, 83.3, 83.3, 116.7, 116.7, 116.7, 116.7, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3 },
-    speed = 92
-}
-
-recoil_table["akm"] = {
-    basic = { 23.7, 23.7, 23.7, 23.7, 23.7, 23.7, 23.7, 23.7, 23.7, 23.7, 23.7, 28, 28, 28, 28, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7, 29.7 },
-    quadruple = { 66.7, 66.7, 66.7, 66.7, 66.7, 66.7, 66.7, 66.7, 66.7, 66.7, 66.7, 123.3, 123.3, 123.3, 123.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3, 93.3 },
-    speed = 100
-}
-
-recoil_table["m16a4"] = {
-    basic = { 25, 25, 25, 29, 33, 33, 32, 33, 32, 32, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30 },
-    quadruple = { 86.7, 86.7, 86.7, 86.7, 86.7, 86.7, 86.7, 150, 150, 150, 150, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120 },
-    speed = 75
-}
-
-recoil_table["m416"] = {
-    basic = { 21, 21, 21, 21, 21, 21, 21, 21, 21, 23, 23, 24, 23, 24, 25, 25, 26, 27, 27, 32, 31, 31, 31, 31, 31, 31, 31, 32, 32, 32, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35 },
-    quadruple = { 86.7, 86.7, 86.7, 86.7, 86.7, 86.7, 86.7, 150, 150, 150, 150, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7 },
-    speed = 86
-}
-
-recoil_table["scarl"] = {
-    basic = { 20, 21, 22, 21, 22, 22, 23, 22, 23, 23, 24, 24, 25, 25, 25, 25, 26, 27, 28, 29, 30, 32, 34, 34, 35, 34, 35, 34, 35, 34, 35, 34, 34, 34, 34, 34, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35 },
-    quadruple = { 86.7, 86.7, 86.7, 86.7, 86.7, 86.7, 86.7, 150, 150, 150, 150, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7, 96.7 },
-    speed = 96
-}
-
-recoil_table["uzi"] = {
-    basic = { 16, 17, 18, 20, 21, 22, 23, 24, 25, 26, 28, 30, 32, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34 },
-    quadruple = { 13.3, 13.3, 13.3, 13.3, 13.3, 21.7, 21.7, 21.7, 21.7, 21.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7, 46.7 },
-    speed = 48
-}
-
-recoil_table["none"] = {
-    basic = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    quadruple = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    speed = 60
-}
-
-
---------------------------------------------------------------------------
-----------------          Function          ------------------------------
---------------------------------------------------------------------------
-
-local target_sensitivity = 50
-local scope_sensitivity = 50
-local scope4x_sensitivity = 50
-
-function convertSens(unconvertedSens)
-    return 0.002 * math.pow(10, unconvertedSens / 50)
+-------------------------------------------------------------------------------
+-- 随机函数，支出负数
+-------------------------------------------------------------------------------
+pubg.random = function (min, max)
+	local nMin = 1
+	local nMax = max - min
+	local randomNumber = math.random(nMin, nMax)
+	return randomNumber + min - 1
 end
 
-function calcSensScale(sensitivity)
-    return convertSens(sensitivity) / convertSens(50)
+-------------------------------------------------------------------------------
+-- 一件拾取装备 = 游戏中：从左边拉物品到武器栏中
+-------------------------------------------------------------------------------
+pubg.onPickupWeapon = function ()
+	local currentMouseX, currentMouseY = GetMousePosition()
+	PressMouseButton(1)
+	for i = 1, 5 do
+		MoveMouseRelative(pubg.random(100, 120), pubg.random(-10, 10))
+		Sleep(20)
+	end
+	ReleaseMouseButton(1)
+	Sleep(100)
+	MoveMouseTo(currentMouseX, currentMouseY)
 end
 
-local targetScale = calcSensScale(target_sensitivity)
-local scopeScale = calcSensScale(scope_sensitivity)
-local scope4xScale = calcSensScale(scope4x_sensitivity)
----- Obfs setting
----- Two firing time intervals = weapon_speed * intervalRatio * ( 1 + randomSeed * ( 0 ~ 1))
-local weaponSpeedMode = false
-local obfsMode = true
-local intervalRatio = 0.75
-local randomSeed = 1
-
-function recoilMode()
-    if IsKeyLockOn(keyQuadruple) then
-        return "quadruple";
-    else
-        return "basic";
-    end
+-------------------------------------------------------------------------------
+-- 一键丢东西 = 游戏中：ctrl+拖放
+-------------------------------------------------------------------------------
+pubg.onDrop = function ()
+	local currentMouseX, currentMouseY = GetMousePosition()
+	PressMouseButton(1);Sleep(20)
+	for i = 1, 3 do
+		MoveMouseRelative(pubg.random(-126, -100), pubg.random(-10, 10))
+		Sleep(20)
+	end
+	ReleaseMouseButton(1)
+	Sleep(100)
+	MoveMouseTo(currentMouseX, currentMouseY)
 end
 
-function recoil_value(_weapon, _duration)
-    local _mode = recoilMode()
-    local step = (math.floor(_duration / 100)) + 1
-    if step > 40 then
-        step = 40
-    end
-    local weaponRecoil = recoil_table[_weapon][_mode][step]
-    -- OutputLogMessage("weaponRecoil = %s\n", weaponRecoil)
-
-    local weapon_speed = 30
-    if weaponSpeedMode then
-        weapon_speed = recoil_table[_weapon]["speed"]
-    end
-    -- OutputLogMessage("weapon_speed = %s\n", weapon_speed)
-
-    local weaponIntervals = weapon_speed
-    if obfsMode then
-        local coefficient = intervalRatio * ( 1 + randomSeed * math.random())
-        weaponIntervals = math.floor(coefficient * weapon_speed)
-    end
-    -- OutputLogMessage("weaponIntervals = %s\n", weaponIntervals)
-
-    recoilRecovery = weaponRecoil * weaponIntervals / 100
-
-    -- issues/3
-    if IsMouseButtonPressed(2) then
-        recoilRecovery = recoilRecovery / targetScale
-    elseif recoilMode() == "basic" then
-        recoilRecovery = recoilRecovery / scopeScale
-    elseif recoilMode() == "quadruple" then
-        recoilRecovery = recoilRecovery / scope4xScale
-    end
-
-    return weaponIntervals, recoilRecovery
+-------------------------------------------------------------------------------
+-- 一键奔跑 = 游戏中：按=好
+-------------------------------------------------------------------------------
+pubg.onAlwayRun = function ()
+	PressKey(0x0d)
+	Sleep(400)
+	ReleaseKey(0x0d)
 end
 
---======================================================================--
---============================    OnEvent    ===========================--
---======================================================================--
+-------------------------------------------------------------------------------
+-- 自动环视周围
+-------------------------------------------------------------------------------
+pubg.onLookAround = function ()
+	PressMouseButton(1)
+	repeat
+		MoveMouseRelative(pubg.random(30, 70), pubg.random(-1, 2))
+		Sleep(20)
+	until not IsMouseButtonPressed(1)
+	ReleaseMouseButton(1)
+end
+
+-------------------------------------------------------------------------------
+-- 当单独的G键被按下
+-------------------------------------------------------------------------------
+pubg.onGKeyPressed = function ()
+	pubg.currentWeapon = "NIL"
+end
+
+-------------------------------------------------------------------------------
+-- 选择UMP9枪
+-------------------------------------------------------------------------------
+pubg.onWeaponUmp9 = function ()
+	local weaponRocilData  = {5, 5, 5, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
+	local weaponDuration   = 20
+	local currentRecoilPos = 1
+	repeat
+		MoveMouseRelative(pubg.random(-1,2), weaponRocilData[currentRecoilPos])
+		currentRecoilPos = currentRecoilPos + 1
+		Sleep(weaponDuration)
+		OutputLogMessage(tostring(currentRecoilPos) .. " ")
+		if currentRecoilPos == #weaponRocilData then
+			currentRecoilPos = 1
+		end
+	until not IsMouseButtonPressed(1)
+end
+
+-------------------------------------------------------------------------------
+-- 选择AKM枪
+-------------------------------------------------------------------------------
+pubg.onWeaponAkm = function ()
+	local weaponRocilData  = {5, 5, 5, 3, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
+	local weaponDuration   = 20
+	local currentRecoilPos = 1
+	repeat
+		MoveMouseRelative(0, weaponRocilData[currentRecoilPos])
+		currentRecoilPos = currentRecoilPos + 1
+		Sleep(weaponDuration)
+		OutputLogMessage(tostring(currentRecoilPos) .. " ")
+		if currentRecoilPos == #weaponRocilData then
+			currentRecoilPos = 1
+		end
+	until not IsMouseButtonPressed(1)
+end
+
+-------------------------------------------------------------------------------
+-- 选择M16A4枪
+-------------------------------------------------------------------------------
+pubg.onWeaponM16a4 = function ()
+	local weaponRocilData  = {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
+	local weaponDuration   = 20
+	local currentRecoilPos = 1
+	repeat
+		MoveMouseRelative(pubg.random(-1,2), weaponRocilData[currentRecoilPos])
+		currentRecoilPos = currentRecoilPos + 1
+		Sleep(weaponDuration)
+		OutputLogMessage(tostring(currentRecoilPos) .. " ")
+		if currentRecoilPos == #weaponRocilData then
+			currentRecoilPos = 1
+		elseif currentRecoilPos % 5 == 0 then
+			ReleaseMouseButton(1)
+			Sleep(10)
+			PressMouseButton(1)
+			Sleep(100)
+		end
+	until not IsMouseButtonPressed(1)
+	OutputLogMessage("IsMouseButtonPressed == false\n")
+end
+
+-------------------------------------------------------------------------------
+-- 选择M416枪
+-------------------------------------------------------------------------------
+pubg.onWeaponM416 = function ()
+	ClearLog()
+	local weaponRocilData  = {5, 5, 5, 3, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
+	local weaponDuration   = 20
+	local currentRecoilPos = 1
+	repeat
+		MoveMouseRelative(pubg.random(-1,2), weaponRocilData[currentRecoilPos])
+		currentRecoilPos = currentRecoilPos + 1
+		Sleep(weaponDuration)
+		OutputLogMessage(tostring(currentRecoilPos) .. " ")
+		if currentRecoilPos == #weaponRocilData then
+			currentRecoilPos = 1
+		elseif currentRecoilPos % 5 == 0 then
+			ReleaseMouseButton(1)
+			Sleep(20)
+			PressMouseButton(1)
+		end
+	until not IsMouseButtonPressed(1)
+end
+
+
+-------------------------------------------------------------------------------
+-- pubg逻辑处理
+-------------------------------------------------------------------------------
+pubg.onEvent = function (event, arg)
+	OutputLogMessage("event = %s, arg = %d\n", event, arg)
+	
+	if event == "PROFILE_ACTIVATED" then
+		EnablePrimaryMouseButtonEvents(true)
+	elseif event == "PROFILE_DEACTIVATED" then
+		EnablePrimaryMouseButtonEvents(false)
+		pubg.currentWeapon = "NIL"
+		ReleaseKey(0x1d)
+		ReleaseMouseButton(1)
+		ReleaseMouseButton(2)
+		return
+	end
+	
+	-- G键按下逻辑
+	if event == "MOUSE_BUTTON_PRESSED" and arg == 6 then
+		pubg.isGKeyPressed = true
+		pubg.isOKeyPressed = false
+	elseif event == "MOUSE_BUTTON_RELEASED" and arg == 6 then
+		pubg.isGKeyPressed = false
+	end
+	
+	-- 在G键按下的时候，其他键是否被按下
+	if event == "MOUSE_BUTTON_PRESSED" and arg ~= 6 and pubg.isGKeyPressed then
+		pubg.isOKeyPressed = true
+	end
+	
+	-- 单独G键被按下
+	if event == "MOUSE_BUTTON_RELEASED" and arg == 6 and pubg.isOKeyPressed == false then
+		pubg.onGKeyPressed()
+		-- 一键拾取物品
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyPickupWeapon and pubg.isGKeyPressed == false then
+		pubg.onPickupWeapon()
+		-- 一键丢弃物品
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyDrop and pubg.isGKeyPressed == true then
+		pubg.onDrop()
+		-- 一键奔跑
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyAlwayRun and pubg.isGKeyPressed == false then
+		pubg.onAlwayRun()
+		-- 自动环视周围
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyLookAround and IsModifierPressed("alt") then
+		pubg.onLookAround()
+		-- 选择UMP9
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponUmp9 and pubg.isGKeyPressed == true then
+		pubg.currentWeapon = "UMP9"
+		-- 选择AKM
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponAkm and pubg.isGKeyPressed == true then
+		pubg.currentWeapon = "AKM"
+		-- 选择M16A4
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponM16a4 and pubg.isGKeyPressed == false then
+		pubg.currentWeapon = "M16A4"
+		-- 选择M416
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponM416 and pubg.isGKeyPressed == false then
+		pubg.currentWeapon = "M416"
+		
+		-- 鼠标左键被按下
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == 1 then
+		if pubg.currentWeapon ~= "NIL" then
+			if pubg.currentWeapon == "UMP9" then
+				pubg.onWeaponUmp9()
+			elseif pubg.currentWeapon == "AKM" then
+				pubg.onWeaponAkm()
+			elseif pubg.currentWeapon == "M16A4" then
+				pubg.onWeaponM16a4()
+			elseif pubg.currentWeapon == "M416" then
+				pubg.onWeaponM416()
+			end
+		end
+	end
+end
+
+
+-------------------------------------------------------------------------------
+-- 驱动入口函数
+-------------------------------------------------------------------------------
 function OnEvent(event, arg)
-    OutputLogMessage("event = %s, arg = %d\n", event, arg)
-    if event == "PROFILE_ACTIVATED" then
-        EnablePrimaryMouseButtonEvents(true)
-    elseif event == "PROFILE_DEACTIVATED" then
-        currentWeapon = "none"
-    end
-
-    if (event == "MOUSE_BUTTON_PRESSED" and arg == 6) then
-        isGPressed = true
-        isOPressed = false
-    elseif (event == "MOUSE_BUTTON_RELEASED" and arg == 6) then
-        isGPressed = false
-        if isOPressed == false then
-            currentWeapon = "none"
-        end
-    end
-
-
-    if (event == "MOUSE_BUTTON_PRESSED" and arg == keyUmp9) then
-        currentWeapon = "ump9"
-        isOPressed = true
-    elseif (event == "MOUSE_BUTTON_PRESSED" and arg == keyM16a4) then
-        currentWeapon = "m416"
-        isOPressed = true
-    elseif (event == "MOUSE_BUTTON_PRESSED" and arg == 1) then
-        if isGPressed then
-            isOPressed = true
-            for i = 1, 5 do
-                MoveMouseRelative(100, math.random(-1, 1))
-            end
-        elseif currentWeapon ~= "none" then
-            local shoot_duration = 0.0
-            repeat
-                local intervals, recovery = recoil_value(currentWeapon, shoot_duration)
-                MoveMouseRelative(math.random(-1, 1), recovery )
-                Sleep(intervals)
-                shoot_duration = shoot_duration + intervals
-            until not IsMouseButtonPressed(1)
-        end
-    end
+	pubg.onEvent(event, arg)
 end
