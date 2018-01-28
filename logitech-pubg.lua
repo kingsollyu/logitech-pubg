@@ -7,7 +7,8 @@ pubg.keyAlwayRun     = 4 -- 直接按键
 pubg.keyLookAround   = 1 -- alt + G + 定义
 pubg.keyWeaponUmp9   = 8 -- G + 定义
 pubg.keyWeaponAkm    = 7 -- G + 定义
-pubg.keyWeaponM16a4  = 7 -- 定义
+pubg.keyWeaponM16a4  = 9 -- 定义
+pubg.keyWeaponUzi    = 7 -- 定义
 pubg.keyWeaponM416   = 5 -- 定义
 pubg.keyDrop         = 1 -- G + 定义
 
@@ -93,17 +94,19 @@ end
 -- 选择UMP9枪
 -------------------------------------------------------------------------------
 pubg.onWeaponUmp9 = function ()
-	local weaponRocilData  = {5, 5, 5, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
-	local weaponDuration   = 20
-	local currentRecoilPos = 1
 	repeat
-		MoveMouseRelative(pubg.random(-1,2), weaponRocilData[currentRecoilPos])
-		currentRecoilPos = currentRecoilPos + 1
-		Sleep(weaponDuration)
-		OutputLogMessage(tostring(currentRecoilPos) .. " ")
-		if currentRecoilPos == #weaponRocilData then
-			currentRecoilPos = 1
-		end
+		MoveMouseRelative(0, 4)
+		Sleep(20)
+	until not IsMouseButtonPressed(1)
+end
+
+-------------------------------------------------------------------------------
+-- 选择UMP9枪
+-------------------------------------------------------------------------------
+pubg.onWeaponUzi = function ()
+	repeat
+		MoveMouseRelative(0, 3)
+		Sleep(20)
 	until not IsMouseButtonPressed(1)
 end
 
@@ -111,17 +114,9 @@ end
 -- 选择AKM枪
 -------------------------------------------------------------------------------
 pubg.onWeaponAkm = function ()
-	local weaponRocilData  = {5, 5, 5, 3, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
-	local weaponDuration   = 20
-	local currentRecoilPos = 1
 	repeat
-		MoveMouseRelative(0, weaponRocilData[currentRecoilPos])
-		currentRecoilPos = currentRecoilPos + 1
-		Sleep(weaponDuration)
-		OutputLogMessage(tostring(currentRecoilPos) .. " ")
-		if currentRecoilPos == #weaponRocilData then
-			currentRecoilPos = 1
-		end
+		MoveMouseRelative(0, 5)
+		Sleep(20)
 	until not IsMouseButtonPressed(1)
 end
 
@@ -129,46 +124,19 @@ end
 -- 选择M16A4枪
 -------------------------------------------------------------------------------
 pubg.onWeaponM16a4 = function ()
-	local weaponRocilData  = {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
-	local weaponDuration   = 20
-	local currentRecoilPos = 1
 	repeat
-		MoveMouseRelative(pubg.random(-1,2), weaponRocilData[currentRecoilPos])
-		currentRecoilPos = currentRecoilPos + 1
-		Sleep(weaponDuration)
-		OutputLogMessage(tostring(currentRecoilPos) .. " ")
-		if currentRecoilPos == #weaponRocilData then
-			currentRecoilPos = 1
-		elseif currentRecoilPos % 5 == 0 then
-			ReleaseMouseButton(1)
-			Sleep(10)
-			PressMouseButton(1)
-			Sleep(100)
-		end
+		MoveMouseRelative(0, 4)
+		Sleep(20)
 	until not IsMouseButtonPressed(1)
-	OutputLogMessage("IsMouseButtonPressed == false\n")
 end
 
 -------------------------------------------------------------------------------
 -- 选择M416枪
 -------------------------------------------------------------------------------
 pubg.onWeaponM416 = function ()
-	ClearLog()
-	local weaponRocilData  = {5, 5, 5, 3, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
-	local weaponDuration   = 20
-	local currentRecoilPos = 1
 	repeat
-		MoveMouseRelative(pubg.random(-1,2), weaponRocilData[currentRecoilPos])
-		currentRecoilPos = currentRecoilPos + 1
-		Sleep(weaponDuration)
-		OutputLogMessage(tostring(currentRecoilPos) .. " ")
-		if currentRecoilPos == #weaponRocilData then
-			currentRecoilPos = 1
-		elseif currentRecoilPos % 5 == 0 then
-			ReleaseMouseButton(1)
-			Sleep(20)
-			PressMouseButton(1)
-		end
+		MoveMouseRelative(0, 5)
+		Sleep(20)
 	until not IsMouseButtonPressed(1)
 end
 
@@ -177,7 +145,7 @@ end
 -- pubg逻辑处理
 -------------------------------------------------------------------------------
 pubg.onEvent = function (event, arg)
-	OutputLogMessage("event = %s, arg = %d\n", event, arg)
+	--OutputLogMessage("event = %s, arg = %d\n", event, arg)
 	
 	if event == "PROFILE_ACTIVATED" then
 		EnablePrimaryMouseButtonEvents(true)
@@ -220,15 +188,23 @@ pubg.onEvent = function (event, arg)
 		pubg.onLookAround()
 		-- 选择UMP9
 	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponUmp9 and pubg.isGKeyPressed == true then
+		OutputLogMessage("use UMP9\n")
 		pubg.currentWeapon = "UMP9"
+		-- 选择UZI
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponUzi and pubg.isGKeyPressed == false then
+		OutputLogMessage("use UZI\n")
+		pubg.currentWeapon = "UZI"
 		-- 选择AKM
 	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponAkm and pubg.isGKeyPressed == true then
+		OutputLogMessage("use AKM\n")
 		pubg.currentWeapon = "AKM"
 		-- 选择M16A4
 	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponM16a4 and pubg.isGKeyPressed == false then
+		OutputLogMessage("use M16A4\n")
 		pubg.currentWeapon = "M16A4"
 		-- 选择M416
 	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponM416 and pubg.isGKeyPressed == false then
+		OutputLogMessage("use M416\n")
 		pubg.currentWeapon = "M416"
 		
 		-- 鼠标左键被按下
@@ -236,6 +212,8 @@ pubg.onEvent = function (event, arg)
 		if pubg.currentWeapon ~= "NIL" then
 			if pubg.currentWeapon == "UMP9" then
 				pubg.onWeaponUmp9()
+			elseif pubg.currentWeapon == "UZI" then
+				pubg.onWeaponUzi()
 			elseif pubg.currentWeapon == "AKM" then
 				pubg.onWeaponAkm()
 			elseif pubg.currentWeapon == "M16A4" then
